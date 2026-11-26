@@ -139,7 +139,7 @@ export default function LoginModal({ onLoginSuccess }) {
     <div className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-[#071120] px-4 select-none">
       {/* 와이드 시네마틱 배경 */}
       <img
-        src="/Appmain-bg.jpg"
+        src="/Appmain-bg.webp"
         alt=""
         onError={(e) => (e.currentTarget.style.display = 'none')}
         className="absolute inset-0 w-full h-full object-cover opacity-55 pointer-events-none"
