@@ -335,7 +335,7 @@ export default function LoginModal({ onLoginSuccess }) {
                     disabled={loading}
                     className="w-full mt-auto py-2.5 bg-[#0F264A] hover:bg-[#163566] text-white text-sm font-bold rounded-xl transition cursor-pointer disabled:opacity-50"
                   >
-                    {loading ? '요청 전송 중...' : 'Master에게 권한 승인 요청'}
+                    {loading ? '요청 전송 중...' : '권한 승인 요청'}
                   </button>
                 </form>
               )}
