@@ -13,6 +13,13 @@ export const ROLES = {
   MEMBER: 'MEMBER', // 지사 담당자 (문서 신청 + 발급 완료 문서 다운로드)
 };
 
+// 공식 지사(사업장) 목록
+export const BRANCH_LIST = [
+  'CTST 2공장',
+  'CTST 3공장',
+  'CTST 천안',
+];
+
 // 기본 등록 계정 (아내분 MASTER 계정 + 발표 시연용 MEMBER 계정)
 export const DEMO_USERS = [
   {
@@ -30,7 +37,7 @@ export const DEMO_USERS = [
     password: '1234',
     name: '김민수 대리',
     role: ROLES.MEMBER,
-    branch: '부산지사 HR',
+    branch: 'CTST 2공장',
     email: 'bs.hr@ramostech.co.kr',
   },
   {
@@ -39,7 +46,7 @@ export const DEMO_USERS = [
     password: '1234',
     name: '이지은 사원',
     role: ROLES.MEMBER,
-    branch: '대전연구소 HR',
+    branch: 'CTST 천안',
     email: 'dj.hr@ramostech.co.kr',
   },
 ];
