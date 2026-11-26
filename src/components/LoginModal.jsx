@@ -166,7 +166,7 @@ export default function LoginModal({ onLoginSuccess }) {
       {/* 중앙 컴팩트 화이트 모달 */}
       <div className="relative z-10 w-full max-w-[400px] h-[360px] flex flex-col bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.6)] border border-white/60 overflow-hidden">
         {/* 상단 탭 */}
-        <div className="grid grid-cols-2 bg-slate-200/85 p-1.5 m-4 mb-2 rounded-xl border border-slate-300/80 shadow-inner">
+        <div className="grid grid-cols-2 bg-[#0B1E3B]/10 p-1.5 m-4 mb-2 rounded-xl border border-[#0B1E3B]/15 shadow-inner">
           <button
             type="button"
             onClick={() => {
