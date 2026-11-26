@@ -1,9 +1,9 @@
 // src/components/LoginModal.jsx
 import React, { useState, useEffect } from 'react';
 import { collection, addDoc, getDocs, query, where, serverTimestamp } from 'firebase/firestore';
-import { Shield, UserPlus, LogIn, Download, CheckCircle2, Lock, User } from 'lucide-react';
+import { Shield, UserPlus, LogIn, Download, CheckCircle2, Lock, User, Building2, ChevronDown } from 'lucide-react';
 import { db } from '../firebaseConfig';
-import { COMPANY_INFO, DEMO_USERS } from '../constants';
+import { COMPANY_INFO, DEMO_USERS, BRANCH_LIST } from '../constants';
 
 export default function LoginModal({ onLoginSuccess }) {
   const [activeTab, setActiveTab] = useState('login'); // 'login' | 'register'
@@ -13,13 +13,14 @@ export default function LoginModal({ onLoginSuccess }) {
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // 지사 Member 계정 신청 폼 상태
+ // 지사 Member 계정 신청 폼 상태
   const [regForm, setRegForm] = useState({
     name: '',
-    branch: '',
+    branch: BRANCH_LIST[0],
     empNo: '',
     password: '',
   });
+  const [branchOpen, setBranchOpen] = useState(false);
   const [regSubmitted, setRegSubmitted] = useState(false);
 
   // PWA 설치 프롬프트 상태
@@ -126,7 +127,7 @@ export default function LoginModal({ onLoginSuccess }) {
         createdAt: serverTimestamp(),
       });
       setRegSubmitted(true);
-      setRegForm({ name: '', branch: '', empNo: '', password: '' });
+      setRegForm({ name: '', branch: BRANCH_LIST[0], empNo: '', password: '' });
     } catch (err) {
       console.error(err);
       alert('계정 신청 중 오류가 발생했습니다.');
@@ -284,16 +285,49 @@ export default function LoginModal({ onLoginSuccess }) {
                 </div>
               ) : (
                 <form onSubmit={handleRegisterSubmit} className="flex-1 flex flex-col gap-2.5 pt-1">
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-600 mb-1">소속 지사명</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="예: 광주호남지사 HR"
-                      value={regForm.branch}
-                      onChange={(e) => setRegForm({ ...regForm, branch: e.target.value })}
-                      className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600"
-                    />
+                 <div className="relative">
+                    <label className="block text-[11px] font-bold text-slate-600 mb-1">소속 사업장</label>
+                    <button
+                      type="button"
+                      onClick={() => setBranchOpen((prev) => !prev)}
+                      className="w-full px-3 py-2 text-sm bg-slate-50 hover:bg-white border border-slate-200 rounded-xl flex items-center justify-between text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-600 transition cursor-pointer"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Building2 className="w-4 h-4 text-blue-600" />
+                        {regForm.branch}
+                      </span>
+                      <ChevronDown
+                        className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                          branchOpen ? 'rotate-180 text-blue-600' : ''
+                        }`}
+                      />
+                    </button>
+
+                    {branchOpen && (
+                      <div className="absolute left-0 right-0 mt-1.5 bg-[#0B1E3B] text-white rounded-xl shadow-xl border border-blue-800/70 py-1.5 z-30 overflow-hidden">
+                        {BRANCH_LIST.map((branchName) => {
+                          const isSelected = regForm.branch === branchName;
+                          return (
+                            <button
+                              key={branchName}
+                              type="button"
+                              onClick={() => {
+                                setRegForm({ ...regForm, branch: branchName });
+                                setBranchOpen(false);
+                              }}
+                              className={`w-full px-3.5 py-2 text-xs font-bold flex items-center justify-between transition cursor-pointer ${
+                                isSelected
+                                  ? 'bg-blue-600 text-white'
+                                  : 'text-blue-100/80 hover:bg-white/10 hover:text-white'
+                              }`}
+                            >
+                              <span>{branchName}</span>
+                              {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
