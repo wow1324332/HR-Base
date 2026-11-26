@@ -158,7 +158,7 @@ export default function LoginModal({ onLoginSuccess }) {
       </button>
 
      {/* 상단 브랜드 로고 이미지 */}
-      <div className="relative z-10 flex justify-center -mb-12 pointer-events-none">
+      <div className="relative z-10 flex justify-center -mb-16 pointer-events-none">
         <img
           src="/hr-logo.png"
           alt="HR Base"
