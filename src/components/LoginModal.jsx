@@ -164,7 +164,7 @@ export default function LoginModal({ onLoginSuccess }) {
       </div>
 
       {/* 중앙 컴팩트 화이트 모달 */}
-      <div className="relative z-10 w-full max-w-[400px] h-[455px] flex flex-col bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.6)] border border-white/60 overflow-hidden">
+      <div className="relative z-10 w-full max-w-[400px] h-[360px] flex flex-col bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.6)] border border-white/60 overflow-hidden">
         {/* 상단 탭 */}
         <div className="grid grid-cols-2 bg-slate-100/90 p-1.5 m-4 mb-2 rounded-xl border border-slate-200/70">
           <button
@@ -202,7 +202,7 @@ export default function LoginModal({ onLoginSuccess }) {
         <div className="px-6 pb-6 pt-2 flex-1 flex flex-col">
           {activeTab === 'login' ? (
             <>
-              <form onSubmit={handleLoginSubmit} className="flex-1 flex flex-col gap-4 pt-2">
+              <form onSubmit={handleLoginSubmit} className="flex-1 flex flex-col gap-2.5 pt-1">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-600 mb-1">
                     ID
@@ -254,7 +254,7 @@ export default function LoginModal({ onLoginSuccess }) {
                 </div>
 
                 {errorMsg && (
-                  <p className="text-xs text-rose-600 font-semibold bg-rose-50 px-3 py-2 rounded-lg">
+                  <p className="text-xs text-rose-600 font-semibold bg-rose-50 px-3 py-1.5 rounded-lg">
                     {errorMsg}
                   </p>
                 )}
@@ -283,10 +283,7 @@ export default function LoginModal({ onLoginSuccess }) {
                   </p>
                 </div>
               ) : (
-                <form onSubmit={handleRegisterSubmit} className="flex-1 flex flex-col gap-3">
-                  <p className="text-xs text-slate-500 leading-relaxed mb-2">
-                    지사 HR 담당자 전용 <strong className="text-blue-700">MEMBER</strong> 권한 신청 양식입니다. 본사 Master 승인 후 활성화됩니다.
-                  </p>
+                <form onSubmit={handleRegisterSubmit} className="flex-1 flex flex-col gap-2.5 pt-1">
                   <div>
                     <label className="block text-[11px] font-bold text-slate-600 mb-1">소속 지사명</label>
                     <input
