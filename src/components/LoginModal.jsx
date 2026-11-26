@@ -162,7 +162,7 @@ export default function LoginModal({ onLoginSuccess }) {
         <img
           src="/hr-logo.png"
           alt="HR Base"
-          className="w-100 sm:w-104 h-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
+          className="w-60 sm:w-64 h-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
         />
       </div>
 
