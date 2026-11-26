@@ -164,7 +164,7 @@ export default function LoginModal({ onLoginSuccess }) {
       </div>
 
       {/* 중앙 컴팩트 화이트 모달 */}
-      <div className="relative z-10 w-full max-w-[400px] bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.6)] border border-white/60 overflow-hidden">
+      <div className="relative z-10 w-full max-w-[400px] h-[455px] flex flex-col bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.6)] border border-white/60 overflow-hidden">
         {/* 상단 탭 */}
         <div className="grid grid-cols-2 bg-slate-100/90 p-1.5 m-4 mb-2 rounded-xl border border-slate-200/70">
           <button
@@ -199,10 +199,10 @@ export default function LoginModal({ onLoginSuccess }) {
           </button>
         </div>
 
-        <div className="px-6 pb-6 pt-2">
+        <div className="px-6 pb-6 pt-2 flex-1 flex flex-col">
           {activeTab === 'login' ? (
             <>
-              <form onSubmit={handleLoginSubmit} className="space-y-3.5">
+              <form onSubmit={handleLoginSubmit} className="flex-1 flex flex-col gap-4 pt-2">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-600 mb-1">
                     ID
@@ -259,10 +259,10 @@ export default function LoginModal({ onLoginSuccess }) {
                   </p>
                 )}
 
-             <button
+                <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-2.5 bg-gradient-to-r from-[#0F264A] to-[#1D4ED8] hover:from-[#0A1B36] hover:to-[#1E40AF] text-white text-sm font-bold rounded-xl shadow-md shadow-blue-900/20 transition cursor-pointer disabled:opacity-50"
+                  className="w-full mt-auto py-2.5 bg-gradient-to-r from-[#0F264A] to-[#1D4ED8] hover:from-[#0A1B36] hover:to-[#1E40AF] text-white text-sm font-bold rounded-xl shadow-md shadow-blue-900/20 transition cursor-pointer disabled:opacity-50"
                 >
                   {loading ? '인증 확인 중...' : 'Login'}
                 </button>
@@ -270,9 +270,9 @@ export default function LoginModal({ onLoginSuccess }) {
             </>
           ) : (
             /* 지사 Member 계정 생성 신청 탭 */
-            <div>
+            <div className="flex-1 flex flex-col">
               {regSubmitted ? (
-                <div className="py-8 text-center space-y-3">
+                <div className="flex-1 flex flex-col items-center justify-center text-center space-y-3">
                   <div className="w-11 h-11 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto">
                     <CheckCircle2 className="w-6 h-6" />
                   </div>
@@ -283,7 +283,7 @@ export default function LoginModal({ onLoginSuccess }) {
                   </p>
                 </div>
               ) : (
-                <form onSubmit={handleRegisterSubmit} className="space-y-3">
+                <form onSubmit={handleRegisterSubmit} className="flex-1 flex flex-col gap-3">
                   <p className="text-xs text-slate-500 leading-relaxed mb-2">
                     지사 HR 담당자 전용 <strong className="text-blue-700">MEMBER</strong> 권한 신청 양식입니다. 본사 Master 승인 후 활성화됩니다.
                   </p>
@@ -336,7 +336,7 @@ export default function LoginModal({ onLoginSuccess }) {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full mt-2 py-2.5 bg-[#0F264A] hover:bg-[#163566] text-white text-sm font-bold rounded-xl transition cursor-pointer disabled:opacity-50"
+                    className="w-full mt-auto py-2.5 bg-[#0F264A] hover:bg-[#163566] text-white text-sm font-bold rounded-xl transition cursor-pointer disabled:opacity-50"
                   >
                     {loading ? '요청 전송 중...' : 'Master에게 권한 승인 요청'}
                   </button>
