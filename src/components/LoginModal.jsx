@@ -166,7 +166,7 @@ export default function LoginModal({ onLoginSuccess }) {
       {/* 중앙 컴팩트 화이트 모달 */}
       <div className="relative z-10 w-full max-w-[400px] h-[360px] flex flex-col bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.6)] border border-white/60 overflow-hidden">
         {/* 상단 탭 */}
-        <div className="grid grid-cols-2 bg-slate-100/90 p-1.5 m-4 mb-2 rounded-xl border border-slate-200/70">
+        <div className="grid grid-cols-2 bg-slate-200/85 p-1.5 m-4 mb-2 rounded-xl border border-slate-300/80 shadow-inner">
           <button
             type="button"
             onClick={() => {
@@ -175,8 +175,8 @@ export default function LoginModal({ onLoginSuccess }) {
             }}
             className={`flex items-center justify-center gap-1.5 py-2 text-xs font-bold rounded-lg transition cursor-pointer ${
               activeTab === 'login'
-                ? 'bg-[#0F264A] text-white shadow-sm'
-                : 'text-slate-500 hover:text-slate-800'
+                ? 'bg-[#0F264A] text-white shadow-md'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
             }`}
           >
             <LogIn className="w-3.5 h-3.5" />
@@ -190,8 +190,8 @@ export default function LoginModal({ onLoginSuccess }) {
             }}
             className={`flex items-center justify-center gap-1.5 py-2 text-xs font-bold rounded-lg transition cursor-pointer ${
               activeTab === 'register'
-                ? 'bg-[#0F264A] text-white shadow-sm'
-                : 'text-slate-500 hover:text-slate-800'
+                ? 'bg-[#0F264A] text-white shadow-md'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
             }`}
           >
             <UserPlus className="w-3.5 h-3.5" />
