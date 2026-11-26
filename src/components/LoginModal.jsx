@@ -1,17 +1,25 @@
 // src/components/LoginModal.jsx
 import React, { useState, useEffect } from 'react';
+import { collection, addDoc, getDocs, query, where, serverTimestamp } from 'firebase/firestore';
 import { Shield, UserPlus, LogIn, Download, Sparkles, CheckCircle2, Lock, User } from 'lucide-react';
-import { COMPANY_INFO, DEMO_USERS, ROLES } from '../constants';
+import { db } from '../firebaseConfig';
+import { COMPANY_INFO, DEMO_USERS } from '../constants';
 
 export default function LoginModal({ onLoginSuccess }) {
   const [activeTab, setActiveTab] = useState('login'); // 'login' | 'register'
-  const [empNo, setEmpNo] = useState('');
+  const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  // 계정 신청 폼 상태
-  const [regForm, setRegForm] = useState({ name: '', branch: '', empNo: '' });
+  // 지사 Member 계정 신청 폼 상태
+  const [regForm, setRegForm] = useState({
+    name: '',
+    branch: '',
+    empNo: '',
+    password: '',
+  });
   const [regSubmitted, setRegSubmitted] = useState(false);
 
   // PWA 설치 프롬프트 상태
@@ -28,7 +36,7 @@ export default function LoginModal({ onLoginSuccess }) {
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
-      alert('이미 앱이 설치되어 있거나 현재 브라우저 환경에서 바로가기를 지원합니다.');
+      alert('이미 앱이 설치되어 있거나 현재 브라우저 메뉴에서 홈 화면 추가를 지원합니다.');
       return;
     }
     deferredPrompt.prompt();
@@ -36,43 +44,109 @@ export default function LoginModal({ onLoginSuccess }) {
     setDeferredPrompt(null);
   };
 
-  // 사번 로그인 처리
-  const handleLoginSubmit = (e) => {
+  // ID / 비밀번호 검증 로그인 처리
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    if (!empNo.trim()) {
-      setErrorMsg('사번을 입력해 주세요.');
+    const trimmedId = loginId.trim();
+    const trimmedPw = password.trim();
+
+    if (!trimmedId || !trimmedPw) {
+      setErrorMsg('아이디와 비밀번호를 모두 입력해 주세요.');
       return;
     }
-    const found = DEMO_USERS.find(
-      (u) => u.empNo.toLowerCase() === empNo.trim().toLowerCase()
-    );
-    if (!found) {
-      setErrorMsg('등록되지 않은 사번입니다. 아래 시연 계정을 이용해 보세요.');
-      return;
+
+    setLoading(true);
+    setErrorMsg('');
+
+    try {
+      // 1) 기본 등록 계정(aminos 마스터 계정 및 기본 시연 계정) 우선 확인
+      const presetUser = DEMO_USERS.find(
+        (u) => u.empNo.toLowerCase() === trimmedId.toLowerCase()
+      );
+
+      if (presetUser) {
+        if (presetUser.password !== trimmedPw) {
+          setErrorMsg('비밀번호가 일치하지 않습니다.');
+          setLoading(false);
+          return;
+        }
+        onLoginSuccess(presetUser, rememberMe);
+        return;
+      }
+
+      // 2) Firestore(hr_users)에 가입 신청된 지사 Member 계정 확인
+      const q = query(
+        collection(db, 'hr_users'),
+        where('empNo', '==', trimmedId)
+      );
+      const snap = await getDocs(q);
+
+      if (snap.empty) {
+        setErrorMsg('존재하지 않는 아이디입니다.');
+        setLoading(false);
+        return;
+      }
+
+      const userDoc = snap.docs[0].data();
+      if (userDoc.password !== trimmedPw) {
+        setErrorMsg('비밀번호가 일치하지 않습니다.');
+        setLoading(false);
+        return;
+      }
+
+      if (userDoc.status === 'PENDING') {
+        setErrorMsg('본사 MASTER 승인 대기 중인 계정입니다.');
+        setLoading(false);
+        return;
+      }
+
+      onLoginSuccess({ uid: snap.docs[0].id, ...userDoc }, rememberMe);
+    } catch (err) {
+      console.error(err);
+      setErrorMsg('로그인 확인 중 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
     }
-    onLoginSuccess(found, rememberMe);
   };
 
-  // 지사 Member 계정 가입 승인 요청 (시연용 UI)
-  const handleRegisterSubmit = (e) => {
+  // 지사 Member 계정 가입 승인 요청 (Firestore 저장)
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
-    if (!regForm.name || !regForm.branch || !regForm.empNo) return;
-    setRegSubmitted(true);
+    if (!regForm.name || !regForm.branch || !regForm.empNo || !regForm.password) return;
+
+    setLoading(true);
+    try {
+      await addDoc(collection(db, 'hr_users'), {
+        empNo: regForm.empNo.trim(),
+        password: regForm.password.trim(),
+        name: regForm.name.trim(),
+        branch: regForm.branch.trim(),
+        role: 'MEMBER',
+        status: 'PENDING', // MASTER 승인 전 대기 상태
+        createdAt: serverTimestamp(),
+      });
+      setRegSubmitted(true);
+      setRegForm({ name: '', branch: '', empNo: '', password: '' });
+    } catch (err) {
+      console.error(err);
+      alert('계정 신청 중 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-[#0A1628] px-4 select-none">
-      {/* 와이드 시네마틱 배경 (/public/login-bg.jpg 존재 시 자동 노출) */}
+      {/* 와이드 시네마틱 배경 */}
       <img
         src="/login-bg.jpg"
         alt=""
         onError={(e) => (e.currentTarget.style.display = 'none')}
         className="absolute inset-0 w-full h-full object-cover opacity-35 scale-105 transition-transform duration-1000 pointer-events-none"
       />
-      {/* 라모스 테크놀러지 딥 네이비 & 블루 비네팅 오버레이 */}
       <div className="absolute inset-0 bg-gradient-to-tr from-[#071120] via-[#0D2142]/85 to-[#1D4ED8]/30 pointer-events-none" />
 
-      {/* 상단 브랜드 워터마크 타이틀 (공간감 강조) */}
+      {/* 상단 브랜드 타이틀 */}
       <div className="relative z-10 text-center mb-6">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/15 border border-blue-400/30 text-blue-200 text-[11px] font-semibold tracking-wider uppercase mb-2 backdrop-blur-md">
           <Sparkles className="w-3 h-3 text-blue-400" />
@@ -86,10 +160,9 @@ export default function LoginModal({ onLoginSuccess }) {
         </p>
       </div>
 
-      {/* 중앙 컴팩트 화이트 모달 (QA Base 컨셉) */}
+      {/* 중앙 컴팩트 화이트 모달 */}
       <div className="relative z-10 w-full max-w-[400px] bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.6)] border border-white/60 overflow-hidden">
-        
-        {/* 상단 탭 (로그인 / 지사 계정 신청) */}
+        {/* 상단 탭 */}
         <div className="grid grid-cols-2 bg-slate-100/90 p-1.5 m-4 mb-2 rounded-xl border border-slate-200/70">
           <button
             type="button"
@@ -129,17 +202,17 @@ export default function LoginModal({ onLoginSuccess }) {
               <form onSubmit={handleLoginSubmit} className="space-y-3.5">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-600 mb-1">
-                    사번 (Employee ID)
+                    아이디 / 사번 (ID)
                   </label>
                   <div className="relative">
                     <input
                       type="text"
-                      value={empNo}
+                      value={loginId}
                       onChange={(e) => {
-                        setEmpNo(e.target.value);
+                        setLoginId(e.target.value);
                         setErrorMsg('');
                       }}
-                      placeholder="RM-1001"
+                      placeholder="아이디 입력"
                       className="w-full pl-9 pr-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition text-slate-900"
                     />
                     <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
@@ -148,13 +221,16 @@ export default function LoginModal({ onLoginSuccess }) {
 
                 <div>
                   <label className="block text-[11px] font-bold text-slate-600 mb-1">
-                    비밀번호
+                    비밀번호 (Password)
                   </label>
                   <div className="relative">
                     <input
                       type="password"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setErrorMsg('');
+                      }}
                       placeholder="••••••••"
                       className="w-full pl-9 pr-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition text-slate-900"
                     />
@@ -162,7 +238,6 @@ export default function LoginModal({ onLoginSuccess }) {
                   </div>
                 </div>
 
-                {/* 로그인 기억하기 & PWA 설치 버튼 */}
                 <div className="flex items-center justify-between pt-0.5">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -192,13 +267,14 @@ export default function LoginModal({ onLoginSuccess }) {
 
                 <button
                   type="submit"
-                  className="w-full py-2.5 bg-gradient-to-r from-[#0F264A] to-[#1D4ED8] hover:from-[#0A1B36] hover:to-[#1E40AF] text-white text-sm font-bold rounded-xl shadow-md shadow-blue-900/20 transition cursor-pointer"
+                  disabled={loading}
+                  className="w-full py-2.5 bg-gradient-to-r from-[#0F264A] to-[#1D4ED8] hover:from-[#0A1B36] hover:to-[#1E40AF] text-white text-sm font-bold rounded-xl shadow-md shadow-blue-900/20 transition cursor-pointer disabled:opacity-50"
                 >
-                  HR Base 접속하기
+                  {loading ? '인증 확인 중...' : 'HR Base 접속하기'}
                 </button>
               </form>
 
-              {/* 발표 시연용 빠른 권한 접속 버튼 (게스트 로그인 대체) */}
+              {/* 발표 시연용 빠른 권한 접속 버튼 */}
               <div className="mt-5 pt-4 border-t border-slate-200/80">
                 <p className="text-[11px] font-bold text-slate-400 text-center mb-2.5">
                   ⚡ 발표 시연용 원클릭 권한 접속
@@ -215,7 +291,7 @@ export default function LoginModal({ onLoginSuccess }) {
                     <p className="text-xs font-bold text-slate-900 group-hover:text-blue-800">
                       본사 HR 총괄
                     </p>
-                    <p className="text-[10px] text-slate-500">접수 확인 · 문서 등록</p>
+                    <p className="text-[10px] text-slate-500">ID: aminos</p>
                   </button>
 
                   <button
@@ -235,7 +311,7 @@ export default function LoginModal({ onLoginSuccess }) {
               </div>
             </>
           ) : (
-            /* 지사 Member 계정 생성 신청 탭 (Master 승인 대기 구조) */
+            /* 지사 Member 계정 생성 신청 탭 */
             <div>
               {regSubmitted ? (
                 <div className="py-8 text-center space-y-3">
@@ -245,13 +321,13 @@ export default function LoginModal({ onLoginSuccess }) {
                   <h3 className="text-sm font-bold text-slate-900">계정 승인 요청이 접수되었습니다</h3>
                   <p className="text-xs text-slate-500 leading-relaxed">
                     본사 HR 총괄(<strong className="text-slate-700">MASTER</strong>) 승인 완료 후<br />
-                    신청하신 사번으로 즉시 로그인이 가능합니다.
+                    신청하신 아이디로 즉시 로그인이 가능합니다.
                   </p>
                 </div>
               ) : (
                 <form onSubmit={handleRegisterSubmit} className="space-y-3">
                   <p className="text-xs text-slate-500 leading-relaxed mb-2">
-                    각 지사 HR 담당자 전용 <strong className="text-blue-700">MEMBER</strong> 권한 신청 양식입니다. 본사 Master 승인 후 활성화됩니다.
+                    지사 HR 담당자 전용 <strong className="text-blue-700">MEMBER</strong> 권한 신청 양식입니다. 본사 Master 승인 후 활성화됩니다.
                   </p>
                   <div>
                     <label className="block text-[11px] font-bold text-slate-600 mb-1">소속 지사명</label>
@@ -277,22 +353,34 @@ export default function LoginModal({ onLoginSuccess }) {
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-600 mb-1">사번</label>
+                      <label className="block text-[11px] font-bold text-slate-600 mb-1">사용할 아이디</label>
                       <input
                         type="text"
                         required
-                        placeholder="RM-3012"
+                        placeholder="예: gj_hr01"
                         value={regForm.empNo}
                         onChange={(e) => setRegForm({ ...regForm, empNo: e.target.value })}
                         className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600"
                       />
                     </div>
                   </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 mb-1">비밀번호 설정</label>
+                    <input
+                      type="password"
+                      required
+                      placeholder="비밀번호 입력"
+                      value={regForm.password}
+                      onChange={(e) => setRegForm({ ...regForm, password: e.target.value })}
+                      className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    />
+                  </div>
                   <button
                     type="submit"
-                    className="w-full mt-2 py-2.5 bg-[#0F264A] hover:bg-[#163566] text-white text-sm font-bold rounded-xl transition cursor-pointer"
+                    disabled={loading}
+                    className="w-full mt-2 py-2.5 bg-[#0F264A] hover:bg-[#163566] text-white text-sm font-bold rounded-xl transition cursor-pointer disabled:opacity-50"
                   >
-                    Master에게 권한 승인 요청
+                    {loading ? '요청 전송 중...' : 'Master에게 권한 승인 요청'}
                   </button>
                 </form>
               )}
@@ -301,7 +389,6 @@ export default function LoginModal({ onLoginSuccess }) {
         </div>
       </div>
 
-      {/* 하단 카피라이트 & 보안 문구 */}
       <div className="relative z-10 mt-6 flex items-center gap-1.5 text-[11px] text-blue-200/60">
         <Shield className="w-3.5 h-3.5 text-blue-400" />
         <span>© 2026 {COMPANY_INFO.name} ({COMPANY_INFO.koName}). Authorized HR Personnel Only.</span>
