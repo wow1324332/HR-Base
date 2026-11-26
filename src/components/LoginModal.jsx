@@ -157,11 +157,13 @@ export default function LoginModal({ onLoginSuccess }) {
         앱 설치(PWA)
       </button>
 
-      {/* 상단 브랜드 타이틀 */}
-      <div className="relative z-10 text-center mb-6">
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-          {COMPANY_INFO.appName}
-        </h1>
+      {/* 상단 브랜드 로고 이미지 */}
+      <div className="relative z-10 flex justify-center mb-3">
+        <img
+          src="/hr-logo.png"
+          alt="HR Base"
+          className="w-52 sm:w-56 h-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
+        />
       </div>
 
       {/* 중앙 컴팩트 화이트 모달 */}
