@@ -13,19 +13,21 @@ export const ROLES = {
   MEMBER: 'MEMBER', // 지사 담당자 (문서 신청 + 발급 완료 문서 다운로드)
 };
 
-// 시연 및 초기 접속용 프리셋 계정
+// 기본 등록 계정 (아내분 MASTER 계정 + 발표 시연용 MEMBER 계정)
 export const DEMO_USERS = [
   {
-    uid: 'master-hq-01',
-    empNo: 'RM-1001',
-    name: '인사총괄 매니저', // 아내분 직함이나 성함으로 자유롭게 변경 가능
+    uid: 'master-aminos',
+    empNo: 'aminos',        // 로그인 ID
+    password: '1324332',    // 로그인 PW
+    name: 'HR 총괄 매니저', // 필요 시 아내분 성함/직함으로 변경 가능
     role: ROLES.MASTER,
     branch: '본사 HR총괄팀',
-    email: 'hr.master@ramostech.co.kr',
+    email: 'aminos@ramostech.co.kr',
   },
   {
     uid: 'member-bs-01',
     empNo: 'RM-2041',
+    password: '1234',
     name: '김민수 대리',
     role: ROLES.MEMBER,
     branch: '부산지사 HR',
@@ -34,6 +36,7 @@ export const DEMO_USERS = [
   {
     uid: 'member-dj-01',
     empNo: 'RM-2088',
+    password: '1234',
     name: '이지은 사원',
     role: ROLES.MEMBER,
     branch: '대전연구소 HR',
