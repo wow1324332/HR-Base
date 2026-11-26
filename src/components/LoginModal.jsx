@@ -136,15 +136,15 @@ export default function LoginModal({ onLoginSuccess }) {
   };
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-[#0A1628] px-4 select-none">
+    <div className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-[#071120] px-4 select-none">
       {/* 와이드 시네마틱 배경 */}
       <img
-        src="/login-bg.jpg"
+        src="/public/Appmain-bg.jpg"
         alt=""
         onError={(e) => (e.currentTarget.style.display = 'none')}
-        className="absolute inset-0 w-full h-full object-cover opacity-35 scale-105 transition-transform duration-1000 pointer-events-none"
+        className="absolute inset-0 w-full h-full object-cover opacity-55 pointer-events-none"
       />
-      <div className="absolute inset-0 bg-gradient-to-tr from-[#071120] via-[#0D2142]/85 to-[#1D4ED8]/30 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-tr from-[#071120]/70 via-[#0D2142]/40 to-transparent pointer-events-none" />
 
       {/* 화면 우측 상단 앱 설치 버튼 */}
       <button
@@ -161,9 +161,6 @@ export default function LoginModal({ onLoginSuccess }) {
         <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
           {COMPANY_INFO.appName}
         </h1>
-        <p className="text-xs sm:text-sm text-blue-100/70 mt-1 font-light">
-          {COMPANY_INFO.subTitle}
-        </p>
       </div>
 
       {/* 중앙 컴팩트 화이트 모달 */}
